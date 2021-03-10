@@ -2,28 +2,46 @@ const fs = require("fs");
 const Image = require("../model/image");
 
 exports.saveImage = async (req, res, next) => {
+
     try {
         const image = new Image({
             user: req.body.user,
-            imagePath: `uploads/${req.file.originalname}`
+            imagePath: req.iPaths
         });
 
         const result = await image.save();
         if (result) return res.status(200).send("Image recieved successfully");
-        
+
     }
-    catch(err) {
+    catch (err) {
         return res.status(400).send(err.message);
     }
 }
 
 exports.transferImage = async (req, res, next) => {
-	const tempPath = req.file.path;
-	const targetPath = `uploads/${req.file.originalname}`;
+    try {
+        const paths = [];
+        if (!req.files.length) {
+            return res.status(401).send("No file supplied")
+        }
 
-	const src = await fs.createReadStream(tempPath);
-	const dest = await fs.createWriteStream(targetPath);
+        for (file of req.files) {
 
-	src.pipe(dest);
-    next();
+            // getting the target file and destination path
+            const tempPath = file.path; // pick up file/s from here (specifiled in multer({dest : "./uploads/FROMUSER"}))
+            const targetPath = `uploads/${file.originalname}`; // drop file/s here
+            paths.push(targetPath);
+
+            const src = fs.createReadStream(tempPath);
+            const dest = fs.createWriteStream(targetPath);
+
+            src.pipe(dest); // I do not know what this is doing ?
+        }
+        console.log(paths);
+        req.iPaths = paths;
+        next();
+    }
+    catch (err) {
+        return res.status(400).send("Error while transfering :" + err.message);
+    }
 }
