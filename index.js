@@ -27,6 +27,7 @@ app.use(express.json());
 app.use(morgan("tiny"));
 
 app.post("/upload", upload.any(), imageController.transferImage, imageController.saveImage );
+app.get("/:user", imageController.sendIamge);
 
 const PORT = process.env.PORT || 2021;
 app.listen(PORT, () => {

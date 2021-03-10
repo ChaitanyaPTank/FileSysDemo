@@ -45,3 +45,23 @@ exports.transferImage = async (req, res, next) => {
         return res.status(400).send("Error while transfering :" + err.message);
     }
 }
+
+exports.sendIamge = async (req, res, next) => {
+    try {
+        const findUser = req.params.user;
+        const user = await Image.find({
+            user: findUser
+        });
+
+        if (!user) res.status(400).send("Could not find the user...");
+
+        // why this is sending just single file only ?
+        return res.download( user[0].imagePath[0], user[0].imagePath[1], (err) => {
+            if (err) console.log("error accured...", err);
+        });
+    }
+    catch (err) {
+        return res.status(400).send("error accured..." + err.message);
+    }
+
+}
