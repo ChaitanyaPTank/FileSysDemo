@@ -1,8 +1,8 @@
 const express = require("express");
 const multer = require("multer");
-const upload = multer({ dest: "./uploads" });
+const upload = multer({ dest: "./uploads/FROMUSER" });
 const mongoose = require("mongoose");
-const fs = require("fs");
+const imageController = require("./controllers/image.controller");
 
 const connectDB = async () => {
 	try {
@@ -22,17 +22,7 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/upload", upload.single("file"), (req, res) => {
-
-	const tempPath = req.file.path;
-	const targetPath = `uploads/${req.file.originalname}`;
-
-	const src = fs.createReadStream(tempPath);
-	const dest = fs.createWriteStream(targetPath);
-	src.pipe(dest);
-
-	return res.status(200).send("recieved");
-});
+app.post("/upload", upload.single("file"), imageController.transferImage, imageController.saveImage );
 
 const PORT = process.env.PORT || 2021;
 app.listen(PORT, () => {
